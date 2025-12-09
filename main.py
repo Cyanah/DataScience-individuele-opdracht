@@ -57,25 +57,22 @@ def download_mediafire(url, output_path):
     st.success(f"Downloaded {os.path.basename(output_path)}")
     return output_path
 
-def load_dataset(name: str):
+def load_dataset(name: str, max_images=None):
     zip_path = Path(f"data/{name}.zip")
     extract_path = Path(f"data/{name}")
 
     if not extract_path.exists():
         download_mediafire(DATA_URLS[name], zip_path)
         st.write(f"Extracting {zip_path.name} ...")
-        try:
-            with zipfile.ZipFile(zip_path, "r") as z:
-                z.extractall(extract_path)
-        except zipfile.BadZipFile:
-            st.error(f"{zip_path.name} is not a valid ZIP file!")
-            return None
+        with zipfile.ZipFile(zip_path, "r") as z:
+            z.extractall(extract_path)
         st.success(f"Dataset '{name}' ready at {extract_path}")
 
-    # Load images
+    # Only store paths
     image_files = sorted([f for f in extract_path.glob("**/*") if f.suffix.lower() in [".jpg", ".png", ".jpeg"]])
-    images = [Image.open(f).convert("RGB") for f in image_files]
-    return images
+    if max_images:
+        image_files = image_files[:max_images]
+    return image_files
 
 def load_ae(model_class, path):
     model = model_class().to(DEVICE)
