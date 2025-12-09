@@ -43,40 +43,38 @@ DATA_URLS = {
 
 def download_mediafire(url, output_path):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
     if os.path.exists(output_path):
         st.info(f"{os.path.basename(output_path)} already exists.")
         return output_path
 
     st.write(f"Downloading {os.path.basename(output_path)} ...")
     response = requests.get(url)
-    response.raise_for_status()  # stop if HTTP error
+    response.raise_for_status()
     with open(output_path, "wb") as f:
         f.write(response.content)
 
     st.success(f"Downloaded {os.path.basename(output_path)}")
     return output_path
 
-@st.cache_data(show_spinner=False)
 def load_dataset(name: str):
-    if name not in DATA_URLS:
-        raise ValueError(f"No URL defined for dataset '{name}'")
-    
     zip_path = Path(f"data/{name}.zip")
     extract_path = Path(f"data/{name}")
 
-    if extract_path.exists():
-        return str(extract_path)  # Already extracted
+    if not extract_path.exists():
+        download_mediafire(DATA_URLS[name], zip_path)
+        st.write(f"Extracting {zip_path.name} ...")
+        try:
+            with zipfile.ZipFile(zip_path, "r") as z:
+                z.extractall(extract_path)
+        except zipfile.BadZipFile:
+            st.error(f"{zip_path.name} is not a valid ZIP file!")
+            return None
+        st.success(f"Dataset '{name}' ready at {extract_path}")
 
-    # Download if missing
-    download_mediafire(DATA_URLS[name], zip_path)
-
-    # Extract ZIP
-    st.write(f"Extracting {zip_path.name} ...")
-    with zipfile.ZipFile(zip_path, "r") as z:
-        z.extractall(extract_path)
-    st.success(f"Dataset '{name}' ready at {extract_path}")
-    return str(extract_path)
+    # Load images
+    image_files = sorted([f for f in extract_path.glob("**/*") if f.suffix.lower() in [".jpg", ".png", ".jpeg"]])
+    images = [Image.open(f).convert("RGB") for f in image_files]
+    return images
 
 def load_ae(model_class, path):
     model = model_class().to(DEVICE)
