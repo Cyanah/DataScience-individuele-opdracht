@@ -11,10 +11,14 @@ from io import BytesIO
 from time import time
 from sklearn.metrics import roc_auc_score, f1_score, accuracy_score, precision_score, recall_score, confusion_matrix, mean_squared_error, mean_absolute_error
 from Library_individuele_opdracht import load_real_dataset, load_anomaly_dataset, make_dataloader, ConvAE, DenoiseAE, VAE, UNetAE, ResNetAE, AnoVAEGAN, get_transforms, ImageListDataset
+from kaggle.api.kaggle_api_extended import KaggleApi
+from pathlib import Path
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 IMG_SIZE = 128
 BATCH_SIZE = 32
+os.environ["KAGGLE_API_TOKEN"] = st.secrets["kaggle"]["api_token"]
+os.environ["KAGGLE_USERNAME"] = st.secrets["kaggle"]["username"]
 
 MODEL_URL = {
     "DBSCAN_MODEL": "https://www.mediafire.com/file/dx6he90s3kr340k/dbscan_model.joblib/file",
@@ -33,6 +37,14 @@ MODEL_URL = {
     "VAEGAN": "https://www.mediafire.com/file/7ypj74bv4pl927l/ano_vaegan_best.pth/file",
     "CONV": "https://www.mediafire.com/file/ksenkwc4r40257p/conv_ae_best.pth/file"
 }
+
+def download_dataset(dataset, path):
+    api = KaggleApi()
+    api.authenticate()
+    data_dir = Path(path)
+    data_dir.mkdir(exist_ok=True)
+    api.dataset_download_files(dataset, path=data_dir, unzip=True)
+    return f"Downloaded {dataset} to {data_dir}"
 
 def download_mediafire(url, output_path):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -111,8 +123,8 @@ if st.button("Download All Models"):
 st.header("📦 Step 2 — Load Dataset")
 
 if st.button("Load hands.zip + dice.zip"):
-    real = load_real_dataset("hands.zip")
-    anomaly = load_anomaly_dataset("dice.zip")
+    real = download_dataset("koryakinp/fingers", "data/fingers")
+    anomaly = download_dataset("koryakinp/d6-dices-images", "data/dices")
 
     # Downsample anomaly for speed
     dice_sample = anomaly[:3600]
