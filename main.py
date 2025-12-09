@@ -17,8 +17,6 @@ from pathlib import Path
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 IMG_SIZE = 128
 BATCH_SIZE = 32
-os.environ["KAGGLE_API_TOKEN"] = st.secrets["kaggle"]["api_token"]
-os.environ["KAGGLE_USERNAME"] = st.secrets["kaggle"]["username"]
 
 MODEL_URL = {
     "DBSCAN_MODEL": "https://www.mediafire.com/file/dx6he90s3kr340k/dbscan_model.joblib/file",
@@ -38,36 +36,53 @@ MODEL_URL = {
     "CONV": "https://www.mediafire.com/file/ksenkwc4r40257p/conv_ae_best.pth/file"
 }
 
-def download_dataset(dataset, path):
-    api = KaggleApi()
-    api.authenticate()
-    data_dir = Path(path)
-    data_dir.mkdir(exist_ok=True)
-    api.dataset_download_files(dataset, path=data_dir, unzip=True)
-    return f"Downloaded {dataset} to {data_dir}"
+DATA_URLS = {
+    "dice": "https://www.mediafire.com/file/r9tl4qpsnwghe31/dice.zip/file",
+    "hands": "https://www.mediafire.com/file/zh6iiwiwcxf1cfl/hands.zip/file"
+}
 
 def download_mediafire(url, output_path):
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
     if os.path.exists(output_path):
-        return
+        return output_path
 
-    st.write(f"Downloading {output_path} ...")
-
-    html = requests.get(url).text
-    import re
+    print(f"Downloading {os.path.basename(output_path)} ...")
+    r = requests.get(url)
+    html = r.text
     match = re.search(r'href="(https://download[^"]+)"', html)
     if not match:
-        st.error("ERROR: Could not extract Mediafire direct link.")
-        return
-
-    real_url = match.group(1)
-    file_bytes = requests.get(real_url).content
-
+        raise ValueError(f"Could not find download link for {url}")
+    download_url = match.group(1)
+    file_data = requests.get(download_url).content
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "wb") as f:
-        f.write(file_bytes)
+        f.write(file_data)
+    print(f"Downloaded: {output_path}")
+    return output_path
 
-    st.success(f"Downloaded {output_path}")
+@st.cache_data(show_spinner=False)
+def load_dataset(name: str):
+    """
+    Downloads and extracts the dataset from MediaFire if missing.
+    Returns the path to the extracted folder.
+    """
+    if name not in DATA_URLS:
+        raise ValueError(f"No URL defined for dataset '{name}'")
+    
+    zip_path = Path(f"data/{name}.zip")
+    extract_path = Path(f"data/{name}")
+
+    if extract_path.exists():
+        return str(extract_path)  # Already extracted
+
+    # Download if missing
+    download_mediafire(DATA_URLS[name], zip_path)
+
+    # Extract
+    print(f"Extracting {zip_path} ...")
+    with zipfile.ZipFile(zip_path, "r") as z:
+        z.extractall(extract_path)
+    print(f"Dataset '{name}' ready at {extract_path}")
+    return str(extract_path)
 
 def load_ae(model_class, path):
     model = model_class().to(DEVICE)
@@ -123,8 +138,8 @@ if st.button("Download All Models"):
 st.header("📦 Step 2 — Load Dataset")
 
 if st.button("Load hands.zip + dice.zip"):
-    real = download_dataset("koryakinp/fingers", "data/fingers")
-    anomaly = download_dataset("koryakinp/d6-dices-images", "data/dices")
+    real = load_dataset("hands")
+    anomaly = load_dataset("dice")
 
     # Downsample anomaly for speed
     dice_sample = anomaly[:3600]
