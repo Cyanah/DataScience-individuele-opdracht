@@ -1,1 +1,13 @@
-
+streamlit
+numpy
+pandas
+matplotlib
+scikit-learn
+joblib
+pillow
+opencv-python-headless
+torch
+torchvision
+tqdm
+requests
+kaggle
