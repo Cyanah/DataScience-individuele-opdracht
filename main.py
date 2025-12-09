@@ -45,24 +45,17 @@ def download_mediafire(url, output_path):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     if os.path.exists(output_path):
-        return
+        st.info(f"{os.path.basename(output_path)} already exists.")
+        return output_path
 
-    st.write(f"Downloading {output_path} ...")
-
-    html = requests.get(url).text
-    import re
-    match = re.search(r'href="(https://download[^"]+)"', html)
-    if not match:
-        st.error("ERROR: Could not extract Mediafire direct link.")
-        return
-
-    real_url = match.group(1)
-    file_bytes = requests.get(real_url).content
-
+    st.write(f"Downloading {os.path.basename(output_path)} ...")
+    response = requests.get(url)
+    response.raise_for_status()  # stop if HTTP error
     with open(output_path, "wb") as f:
-        f.write(file_bytes)
+        f.write(response.content)
 
-    st.success(f"Downloaded {output_path}")
+    st.success(f"Downloaded {os.path.basename(output_path)}")
+    return output_path
 
 @st.cache_data(show_spinner=False)
 def load_dataset(name: str):
