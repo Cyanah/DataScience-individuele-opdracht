@@ -15,6 +15,7 @@ from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as T
 import numpy as np
 import os
+import requests
 
 def normalize_path(path):
     parts = path.split("/")
@@ -288,4 +289,24 @@ class ResNetAE(nn.Module):
         recon = self.dec(z)
         return recon
 
+
 AnoVAEGAN = VAEGAN
+
+def download_mediafire(url, output_path):
+    if os.path.exists(output_path):
+        return print("Already downloaded.")
+
+    print(f"Downloading: {output_path} ...")
+    response = requests.get(url)
+    html = response.text
+    import re
+    match = re.search(r'href="(https://download[^"]+)"', html)
+    if not match:
+        raise ValueError("Could not find Mediafire download link. URL may be incorrect.")
+
+    real_url = match.group(1)
+    file_data = requests.get(real_url).content
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "wb") as f:
+        f.write(file_data)
+    print(f"✓ Downloaded: {output_path}")
