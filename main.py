@@ -42,22 +42,27 @@ DATA_URLS = {
 }
 
 def download_mediafire(url, output_path):
-    if os.path.exists(output_path):
-        return output_path
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    print(f"Downloading {os.path.basename(output_path)} ...")
-    r = requests.get(url)
-    html = r.text
+    if os.path.exists(output_path):
+        return
+
+    st.write(f"Downloading {output_path} ...")
+
+    html = requests.get(url).text
+    import re
     match = re.search(r'href="(https://download[^"]+)"', html)
     if not match:
-        raise ValueError(f"Could not find download link for {url}")
-    download_url = match.group(1)
-    file_data = requests.get(download_url).content
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        st.error("ERROR: Could not extract Mediafire direct link.")
+        return
+
+    real_url = match.group(1)
+    file_bytes = requests.get(real_url).content
+
     with open(output_path, "wb") as f:
-        f.write(file_data)
-    print(f"Downloaded: {output_path}")
-    return output_path
+        f.write(file_bytes)
+
+    st.success(f"Downloaded {output_path}")
 
 @st.cache_data(show_spinner=False)
 def load_dataset(name: str):
