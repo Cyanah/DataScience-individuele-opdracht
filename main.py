@@ -137,16 +137,12 @@ if st.button("Load hands.zip + dice.zip"):
     # Downsample anomaly for speed
     dice_sample = anomaly[:3600]
 
-    transform = get_transforms(image_size=IMG_SIZE)
-    dataset_resized = ImageListDataset(dice_sample, transform)
-
-    dice_resized = [img.resize((IMG_SIZE, IMG_SIZE)) for img in dice_sample]
+    hands_resized = [img.resize((IMG_SIZE, IMG_SIZE)) for img in real]
+    dice_resized = [img.resize((IMG_SIZE, IMG_SIZE)) for img in anomaly]
 
     # Combined for evaluation
-    hands_test = real["test"]
-    combined_imgs = hands_test + dice_resized
-    combined_labels = np.array([0]*len(hands_test) + [1]*len(dice_resized))
-
+    combined_imgs = hands_resized + dice_resized
+    combined_labels = np.array([0]*len(hands_resized) + [1]*len(dice_resized))
     combined_loader = make_dataloader(combined_imgs, batch=BATCH_SIZE, shuffle=False)
 
     st.session_state["combined_loader"] = combined_loader
