@@ -131,11 +131,8 @@ if st.button("Load hands.zip + dice.zip"):
     real = load_dataset("hands")
     anomaly = load_dataset("dice")
 
-    # Downsample anomaly for speed
-    dice_sample = anomaly[:3600]
-
-    hands_resized = [img.resize((IMG_SIZE, IMG_SIZE)) for img in real]
-    dice_resized = [img.resize((IMG_SIZE, IMG_SIZE)) for img in anomaly]
+    hands_resized = [Image.open(f).convert("RGB").resize((IMG_SIZE, IMG_SIZE)) for f in real]
+    dice_resized = [Image.open(f).convert("RGB").resize((IMG_SIZE, IMG_SIZE)) for f in anomaly[:3600]]
 
     # Combined for evaluation
     combined_imgs = hands_resized + dice_resized
