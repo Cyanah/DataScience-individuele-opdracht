@@ -59,10 +59,6 @@ def download_mediafire(url, output_path):
 
 @st.cache_data(show_spinner=False)
 def load_dataset(name: str):
-    """
-    Downloads and extracts the dataset from MediaFire if missing.
-    Returns the path to the extracted folder.
-    """
     if name not in DATA_URLS:
         raise ValueError(f"No URL defined for dataset '{name}'")
     
@@ -75,11 +71,11 @@ def load_dataset(name: str):
     # Download if missing
     download_mediafire(DATA_URLS[name], zip_path)
 
-    # Extract
-    print(f"Extracting {zip_path} ...")
+    # Extract ZIP
+    st.write(f"Extracting {zip_path.name} ...")
     with zipfile.ZipFile(zip_path, "r") as z:
         z.extractall(extract_path)
-    print(f"Dataset '{name}' ready at {extract_path}")
+    st.success(f"Dataset '{name}' ready at {extract_path}")
     return str(extract_path)
 
 def load_ae(model_class, path):
