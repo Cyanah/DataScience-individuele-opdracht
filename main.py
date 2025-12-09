@@ -13,6 +13,7 @@ from sklearn.metrics import roc_auc_score, f1_score, accuracy_score, precision_s
 from Library_individuele_opdracht import load_real_dataset, load_anomaly_dataset, make_dataloader, ConvAE, DenoiseAE, VAE, UNetAE, ResNetAE, AnoVAEGAN, get_transforms, ImageListDataset
 from kaggle.api.kaggle_api_extended import KaggleApi
 from pathlib import Path
+import zipfile
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 IMG_SIZE = 128
