@@ -182,7 +182,7 @@ if st.button("Run Evaluation"):
                 ax.text(j, i, cm[i][j], ha="center", va="center", color="black")
         st.pyplot(fig)
 
-  st.header("🎨 Step 4 — Pixelated Blur for Dice")
+st.header("🎨 Step 4 — Pixelated Blur for Dice")
 
 if st.button("Show Pixelated Example"):
     if "dice_resized" not in st.session_state:
