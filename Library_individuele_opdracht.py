@@ -16,6 +16,7 @@ import torchvision.transforms as T
 import numpy as np
 import os
 import requests
+import re
 
 def normalize_path(path):
     parts = path.split("/")
@@ -294,7 +295,8 @@ AnoVAEGAN = VAEGAN
 
 def download_mediafire(url, output_path):
     if os.path.exists(output_path):
-        return print("Already downloaded.")
+        print("Already downloaded.")
+        return 
 
     print(f"Downloading: {output_path} ...")
     response = requests.get(url)
@@ -310,3 +312,4 @@ def download_mediafire(url, output_path):
     with open(output_path, "wb") as f:
         f.write(file_data)
     print(f"✓ Downloaded: {output_path}")
+
