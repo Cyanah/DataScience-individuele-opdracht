@@ -37,8 +37,8 @@ MODEL_URL = {
 }
 
 DATA_URLS = {
-    "dice": "https://www.mediafire.com/file/r9tl4qpsnwghe31/dice.zip/file",
-    "hands": "https://www.mediafire.com/file/zh6iiwiwcxf1cfl/hands.zip/file"
+    "dice": "https://download1478.mediafire.com/ndp5k7b5yc1gSFut7U6lKWtjZaT8OuO0tCK39tk0sSdffJ_G7mWRozTw_BYBvrp_grFNXN2zF4xHkZ3Clf2mbPJXs6tUl1MIz0YUCeUCvz6rGaCFs9U_B_aQkxqk2TpKIkowImDiGGxr0bj1QXWRzB0hcLLv_ZbIke3_7klfrCZG/r9tl4qpsnwghe31/dice.zip",
+    "hands": "https://download1528.mediafire.com/7f82nsmf7bcg6UGlIYDM0YtjsTbuUi8Q7y3Inde9a_9IjMcdCazwdOKSsioTs98Zm6K7919xYI-skuer0mZmN-sPJiK52CDpBXQVtpoYmJC2UuwR9JPt8AZd1UKtGqR6aWteEI7ODDDjv3JDwe-z79iMIlMmxvIHL4_XtXw4AFu0/zh6iiwiwcxf1cfl/hands.zip"
 }
 
 def download_mediafire(url, output_path):
